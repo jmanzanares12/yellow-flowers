@@ -1,11 +1,9 @@
-
+import FlowerAnimation from "./components/FlowerAnimation"
 
 function App() {
-
-
   return (
     <>
-
+      <FlowerAnimation />
     </>
   )
 }
