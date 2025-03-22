@@ -7,7 +7,7 @@ const FlowerAnimation: React.FC = () => {
 
     useEffect(() => {
         const flowerTimer = setTimeout(() => setShowFlower(true), 1500);
-        const messageTimer = setTimeout(() => setShowMessage(true), 2000);
+        const messageTimer = setTimeout(() => setShowMessage(true), 4000);
 
         return () => {
             clearTimeout(flowerTimer);
@@ -22,86 +22,106 @@ const FlowerAnimation: React.FC = () => {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        canvas.width = 800;
-        canvas.height = 600;
+        const resizeCanvas = () => {
+            canvas.width = window.innerWidth * 0.9;
+            canvas.height = window.innerHeight * 0.7;
+            drawBouquet();
+        };
 
-        const drawFlower = (x: number, y: number) => {
-            let frame = 0;
-            const maxFrame = 30;
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
 
-            const animatePetals = () => {
-                ctx.clearRect(x -40, y - 40, 80, 80);
+        return () => window.removeEventListener("resize", resizeCanvas);
+    }, [showFlower]);
 
-                const centerGradient = ctx.createRadialGradient(x, y, 2, x, y, 10);
-                centerGradient.addColorStop(0, "#FFA500");
-                centerGradient.addColorStop(1, "#8B4513");
+    const drawFlower = (ctx: CanvasRenderingContext2D, x: number, y: number, scale: number) => {
+        let frame = 0;
+        const maxFrames = 30;
+
+        const animatePetals = () => {
+            ctx.clearRect(x - 40 * scale, y - 40 * scale, 80 * scale, 80 * scale);
+
+            // Gradiente para el centro
+            const centerGradient = ctx.createRadialGradient(x, y, 2 * scale, x, y, 10 * scale);
+            centerGradient.addColorStop(0, "#FFA500");
+            centerGradient.addColorStop(1, "#8B4513");
+
+            // Centro de la flor
+            ctx.beginPath();
+            ctx.arc(x, y, 10 * scale, 0, Math.PI * 2);
+            ctx.fillStyle = centerGradient;
+            ctx.fill();
+
+            // Dibujar pétalos con animación
+            ctx.fillStyle = "#FFD700";
+            ctx.strokeStyle = "#DAA520";
+            ctx.lineWidth = 1.5 * scale;
+
+            for (let angle = 0; angle < 360; angle += 45) {
+                const radians = angle * (Math.PI / 180);
+                const petalSize = (5 + (frame / maxFrames) * 10) * scale;
+
+                const petalX = x + Math.cos(radians) * (15 + (frame / maxFrames) * 15) * scale;
+                const petalY = y + Math.sin(radians) * (15 + (frame / maxFrames) * 15) * scale;
 
                 ctx.beginPath();
-                ctx.arc(x, y, 10, 0, Math.PI * 2);
-                ctx.fillStyle = centerGradient;
+                ctx.ellipse(petalX, petalY, petalSize, petalSize * 0.7, radians, 0, Math.PI * 2);
                 ctx.fill();
-
-                ctx.fillStyle = "#FFD700";
-                ctx.strokeStyle = "#DAA520";
-                ctx.lineWidth = 2;
-
-                for (let angle = 0; angle < 360; angle += 45){
-                    const radius = angle * (Math.PI / 180);
-                    const petalSize = 5 + (frame / maxFrame) * 10;
-
-                    const petalX = x + Math.cos(radius) * (15 + (frame / maxFrame) * 15);
-                    const petalY = y + Math.sin(radius) * (15 + (frame / maxFrame) * 15);
-
-                    ctx.beginPath();
-                    ctx.ellipse(petalX, petalY, petalSize, petalSize * 0.7, radius, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                }
-
-                if (frame < maxFrame) {
-                    frame++;
-                    requestAnimationFrame(animatePetals);
-                }
+                ctx.stroke();
             }
-            animatePetals();
+
+            if (frame < maxFrames) {
+                frame++;
+                requestAnimationFrame(animatePetals);
+            }
         };
 
-        const drawBouquet = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        animatePetals();
+    };
 
-            const gradient = ctx.createLinearGradient(400, 500, 400, 250);
-            gradient.addColorStop(0, "#006400");
-            gradient.addColorStop(1, "#32CD32");
+    const drawBouquet = () => {
+        if (!canvasRef.current) return;
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
 
-            ctx.strokeStyle = gradient;
-            ctx.lineWidth = 6;
-            ctx.lineCap = "round";
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const scale = Math.min(canvas.width / 800, canvas.height / 600);
 
-            ctx.beginPath();
-            ctx.moveTo(450, 500);
-            ctx.quadraticCurveTo(380, 400, 400, 300);
-            ctx.stroke();
+        // Tallos con gradiente
+        const gradient = ctx.createLinearGradient(400, 500, 400, 250);
+        gradient.addColorStop(0, "#006400");
+        gradient.addColorStop(1, "#32CD32");
 
-            ctx.beginPath();
-            ctx.moveTo(400, 400);
-            ctx.quadraticCurveTo(350, 350, 370, 300);
-            ctx.stroke();
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = 4 * scale;
+        ctx.lineCap = "round";
 
-            ctx.beginPath();
-            ctx.moveTo(400, 400);
-            ctx.quadraticCurveTo(450, 370, 430, 300);
-            ctx.stroke();
+        // Dibujar tallos
+        ctx.beginPath();
+        ctx.moveTo(450 * scale, 500 * scale);
+        ctx.quadraticCurveTo(380 * scale, 400 * scale, 400 * scale, 300 * scale);
+        ctx.stroke();
 
-            const flowerPositions: [number, number][] = [
-                [400, 250],
-                [350, 340],
-                [450, 340]
-            ];
-            flowerPositions.forEach(([fx, fy]) => drawFlower(fx, fy));
-        };
+        ctx.beginPath();
+        ctx.moveTo(400 * scale, 400 * scale);
+        ctx.quadraticCurveTo(350 * scale, 350 * scale, 370 * scale, 300 * scale);
+        ctx.stroke();
 
-        drawBouquet();
-    }, [showFlower]);
+        ctx.beginPath();
+        ctx.moveTo(400 * scale, 400 * scale);
+        ctx.quadraticCurveTo(450 * scale, 370 * scale, 430 * scale, 300 * scale);
+        ctx.stroke();
+
+        // Posiciones de las flores
+        const flowerPositions: [number, number][] = [
+            [400, 250],
+            [350, 340],
+            [450, 340]
+        ];
+
+        flowerPositions.forEach(([fx, fy]) => drawFlower(ctx, fx * scale, fy * scale, scale));
+    };
 
     return (
         <div className="w-screen h-screen bg-black flex flex-col justify-center items-center p-4">
