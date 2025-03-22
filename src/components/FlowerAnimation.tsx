@@ -7,7 +7,7 @@ const FlowerAnimation: React.FC = () => {
 
     useEffect(() => {
         const flowerTimer = setTimeout(() => setShowFlower(true), 1500);
-        const messageTimer = setTimeout(() => setShowMessage(true), 4000);
+        const messageTimer = setTimeout(() => setShowMessage(true), 2000);
 
         return () => {
             clearTimeout(flowerTimer);
@@ -94,8 +94,6 @@ const FlowerAnimation: React.FC = () => {
 
             const flowerPositions: [number, number][] = [
                 [400, 250],
-                [370, 300],
-                [430, 300],
                 [350, 340],
                 [450, 340]
             ];
@@ -106,11 +104,10 @@ const FlowerAnimation: React.FC = () => {
     }, [showFlower]);
 
     return (
-        <div className="w-screen h-screen bg-black flex flex-col justify-center items-center">
-            <canvas ref={canvasRef} className="border-2 border-gray-700 rounded-lg shadow-lg" />
+        <div className="w-screen h-screen bg-black flex flex-col justify-center items-center p-4">
+            <canvas ref={canvasRef} className="border-2 border-gray-800 rounded-lg shadow-lg" />
             {showMessage && (
-                <div className="fixed bottom-12 text-white text-center text-xl font-semibold
-                    animate-fadeIn opacity-0 transition-opacity duration-2000">
+                <div className="fixed bottom-8 text-white text-center text-lg sm:text-xl font-semibold opacity-0 animate-fadeIn">
                     <h2 className="text-yellow-400">You are a beautiful flower 🌻</h2>
                     <h3>This is for you 💛</h3>
                 </div>
