@@ -22,82 +22,97 @@ const FlowerAnimation: React.FC = () => {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        // Configure the canvas
         canvas.width = 800;
         canvas.height = 600;
 
-        // Draw the flower
         const drawFlower = (x: number, y: number) => {
-            // Center
-            ctx.beginPath();
-            ctx.arc(x, y, 10, 0, Math.PI * 2);
-            ctx.fillStyle = "#8B4513";
-            ctx.fill();
+            let frame = 0;
+            const maxFrame = 30;
 
-            // Petals
-            ctx.fillStyle = "#FFD700";
-            for (let angle = 0; angle < 360; angle += 45) {
-                const radius = angle * (Math.PI / 180);
-                const petalX = x + Math.cos(radius) * 25;
-                const petalY = y + Math.sin(radius) * 25;
+            const animatePetals = () => {
+                ctx.clearRect(x -40, y - 40, 80, 80);
+
+                const centerGradient = ctx.createRadialGradient(x, y, 2, x, y, 10);
+                centerGradient.addColorStop(0, "#FFA500");
+                centerGradient.addColorStop(1, "#8B4513");
 
                 ctx.beginPath();
-                ctx.ellipse(petalX, petalY, 15, 10, 0, 0, Math.PI * 2);
+                ctx.arc(x, y, 10, 0, Math.PI * 2);
+                ctx.fillStyle = centerGradient;
                 ctx.fill();
+
+                ctx.fillStyle = "#FFD700";
                 ctx.strokeStyle = "#DAA520";
                 ctx.lineWidth = 2;
-                ctx.stroke();
+
+                for (let angle = 0; angle < 360; angle += 45){
+                    const radius = angle * (Math.PI / 180);
+                    const petalSize = 5 + (frame / maxFrame) * 10;
+
+                    const petalX = x + Math.cos(radius) * (15 + (frame / maxFrame) * 15);
+                    const petalY = y + Math.sin(radius) * (15 + (frame / maxFrame) * 15);
+
+                    ctx.beginPath();
+                    ctx.ellipse(petalX, petalY, petalSize, petalSize * 0.7, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+
+                if (frame < maxFrame) {
+                    frame++;
+                    requestAnimationFrame(animatePetals);
+                }
             }
+            animatePetals();
         };
 
-        const drawBuquet = () => {
+        const drawBouquet = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const gardient = ctx.createLinearGradient(400, 500, 400, 250);
-            gardient.addColorStop(0, "#006400");
-            gardient.addColorStop(1, "#32CD32");
+            const gradient = ctx.createLinearGradient(400, 500, 400, 250);
+            gradient.addColorStop(0, "#006400");
+            gradient.addColorStop(1, "#32CD32");
 
-            ctx.strokeStyle = gardient;
-            ctx.lineWidth = 5;
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 6;
+            ctx.lineCap = "round";
 
             ctx.beginPath();
-            ctx.moveTo(400, 500);
-            ctx.lineTo(400, 300);
-            ctx.stroke();
-
-            ctx.lineWidth = 8;
-            ctx.beginPath();
-            ctx.moveTo(400, 400);
-            ctx.lineTo(350, 300);
+            ctx.moveTo(450, 500);
+            ctx.quadraticCurveTo(380, 400, 400, 300);
             ctx.stroke();
 
             ctx.beginPath();
             ctx.moveTo(400, 400);
-            ctx.lineTo(450, 350);
+            ctx.quadraticCurveTo(350, 350, 370, 300);
             ctx.stroke();
 
-            //Flower
-            const flowerPosition: [number, number][] = [
+            ctx.beginPath();
+            ctx.moveTo(400, 400);
+            ctx.quadraticCurveTo(450, 370, 430, 300);
+            ctx.stroke();
+
+            const flowerPositions: [number, number][] = [
                 [400, 250],
                 [370, 300],
                 [430, 300],
                 [350, 340],
                 [450, 340]
             ];
-            flowerPosition.forEach(([fx, fy]) => drawFlower(fx, fy));
-        }
-        drawBuquet();
+            flowerPositions.forEach(([fx, fy]) => drawFlower(fx, fy));
+        };
+
+        drawBouquet();
     }, [showFlower]);
 
     return (
-        <div className="w-screen h-screen bg-black flex justify-center items-center">
-            <canvas ref={canvasRef} />
+        <div className="w-screen h-screen bg-black flex flex-col justify-center items-center">
+            <canvas ref={canvasRef} className="border-2 border-gray-700 rounded-lg shadow-lg" />
             {showMessage && (
-                <div className="fixed bottom-12 text-white text-center
-                    animate-[fadeIn_2s_ease-in_4s_fordwards] opacity-0
-                    text-2xl font-bold font-coursive" >
-                    <h2 >U r a beautiful flower</h2><br />
-                    <h3>This is for u</h3>
+                <div className="fixed bottom-12 text-white text-center text-xl font-semibold
+                    animate-fadeIn opacity-0 transition-opacity duration-2000">
+                    <h2 className="text-yellow-400">You are a beautiful flower 🌻</h2>
+                    <h3>This is for you 💛</h3>
                 </div>
             )}
         </div>
